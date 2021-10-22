@@ -1,7 +1,8 @@
 import json
 import os.path
 
-import discord
+import dateutil
+from discord import Embed, Colour
 from discord.ext import commands, tasks
 
 from api import Solanart
@@ -9,7 +10,7 @@ from api import Solanart
 
 # URL = 'https://discord.com/api/oauth2/authorize?client_id=900276529903317022&permissions=60496&scope=bot'
 
-class FancyFrenchieDiscordClient(discord.Client):
+class FancyFrenchieDiscordClient(commands.Bot):
     # REAL
     SALES_CHANNEL = 899914291136831518
 
@@ -17,7 +18,7 @@ class FancyFrenchieDiscordClient(discord.Client):
     # SALES_CHANNEL = 901043744772620298
 
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs, command_prefix='$')
 
     def start_tasks(self):
         self.check_for_sales.start()
@@ -37,23 +38,25 @@ class FancyFrenchieDiscordClient(discord.Client):
         if message.author == client.user:
             return
 
-        # test
-        if message.content.startswith('$hello'):
-            await message.channel.send('Hello!')
-
-        # most recent sale
-        if message.content.startswith('$recent'):
-            await message.channel.send('Fetching the most recent sale...')
-            await Solanart.fetch_recent(message)
+        await client.process_commands(message)
 
 
 client = FancyFrenchieDiscordClient()
-bot = commands.Bot(command_prefix='$')
 
 
-# @bot.command()
-# async def recent(ctx: commands.Context, arg):
-#     ctx.send('recent')
+@client.command()
+async def high(ctx):
+    await Solanart.fetch_most_expensive(ctx)
+
+
+@client.command()
+async def low(ctx):
+    await Solanart.fetch_cheapest(ctx)
+
+
+@client.command()
+async def recent(ctx):
+    await Solanart.fetch_recent(ctx)
 
 
 def start_bot():
