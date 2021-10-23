@@ -61,8 +61,9 @@ class Solanart:
         data = response.json()
         return data
 
-    async def check_for_new_sales(client):
-        print(f'[{datetime.datetime.now()}] Checking for new sales...')
+    async def check_for_sales(client):
+        print(f'[{datetime.datetime.now()}] Checking Solanart for new sales...')
+
         data = Solanart.fetch()
         if data == None:
             print('data is None')
@@ -82,35 +83,35 @@ class Solanart:
                 image=frenchie['link_img'],
             )
             if Solanart.is_seen(sale.id):
-                pass
+                return
                 # print(f'ignoring {sale.id}')
             else:
                 Solanart.add_to_seen(sale.id)
                 print(f'added {sale.id} to seen')
 
-                embed = Embed(
-                    title=sale.item,
-                    # description=sale.pretty,
-                    colour=Colour.from_rgb(0, 191, 255),
-                    url=sale.explorer,
-                    timestamp=dateutil.parser.parse(sale.date),
-                )
-                embed.set_image(url=sale.image)
-                embed.add_field(name='Sale price', value=f'**{sale.price} SOL**', inline=False)
-                embed.add_field(name='Buyer', value=sale.toAddress, inline=True)
-                embed.add_field(name='Seller', value=f'{sale.fromAddress}', inline=True)
-                embed.add_field(name='Token', value=sale.token, inline=False)
+            embed = Embed(
+                title=sale.item,
+                # description=sale.pretty,
+                colour=Colour.from_rgb(0, 191, 255),
+                url=sale.explorer,
+                timestamp=dateutil.parser.parse(sale.date),
+            )
+            embed.set_image(url=sale.image)
+            embed.add_field(name='Sale price', value=f'**{sale.price} SOL**', inline=False)
+            embed.add_field(name='Buyer', value=sale.toAddress, inline=True)
+            embed.add_field(name='Seller', value=f'{sale.fromAddress}', inline=True)
+            embed.add_field(name='Token', value=sale.token, inline=False)
 
-                channel = client.get_channel(client.SALES_CHANNEL)
-                message = await channel.send(embed=embed)
+            channel = client.get_channel(client.CHANNEL)
+            message = await channel.send(embed=embed)
 
-                pog = client.get_emoji(886353956652056627)
-                plus = client.get_emoji(886351382905491496)
+            pog = client.get_emoji(886353956652056627)
+            plus = client.get_emoji(886351382905491496)
 
-                emojis = [plus, pog, '😍', '👀']
+            emojis = [plus, pog, '😍', '👀']
 
-                for emoji in emojis:
-                    await message.add_reaction(emoji)
+            for emoji in emojis:
+                await message.add_reaction(emoji)
 
     @staticmethod
     async def fetch_most_expensive(ctx):
@@ -134,7 +135,7 @@ class Solanart:
         embed = Embed(
             title=sale.item,
             description="Today's most expensive Fancy Frenchie sale",
-            colour=Colour.from_rgb(11, 218, 81),
+            colour=Colour.from_rgb(0, 255, 0),
             url=sale.explorer,
             timestamp=dateutil.parser.parse(sale.date),
         )
@@ -169,7 +170,7 @@ class Solanart:
         embed = Embed(
             title=sale.item,
             description="Today's cheapest Fancy Frenchie sale",
-            colour=Colour.from_rgb(11, 218, 81),
+            colour=Colour.from_rgb(255, 0, 0),
             url=sale.explorer,
             timestamp=dateutil.parser.parse(sale.date),
         )
@@ -207,7 +208,7 @@ class Solanart:
 
             embed = Embed(
                 title=sale.item,
-                # description=sale.pretty,
+                description="The most recently sold Fancy Frenchie",
                 colour=Colour.from_rgb(0, 191, 255),
                 url=sale.explorer,
                 timestamp=dateutil.parser.parse(sale.date),
@@ -221,3 +222,99 @@ class Solanart:
             message = await ctx.send(embed=embed)
 
         return data
+
+    @staticmethod
+    async def fetch_summary(ctx):
+        data = Solanart.fetch()
+        MINT_PRICE = 2.0
+        less_than_mint = {}
+        greater_than_equal_mint = {}
+
+        for sale in data:
+            pass
+
+    @staticmethod
+    async def fetch_paperhands(ctx):
+        data = Solanart.fetch()
+        wallets: dict = {}
+        volume: dict = {}
+
+        for sale in data:
+            seller_address = sale['seller_address']
+            price = sale['price']
+
+            wallets[seller_address] = wallets.get(seller_address, 0) + 1
+            volume[seller_address] = volume.get(seller_address, 0) + price
+
+        wallet = max(wallets, key=wallets.get)
+        paperhands_address = wallet
+        volume = volume[paperhands_address]
+        sales = wallets[paperhands_address]
+
+        embed = Embed(
+            title="Paperhand of the Day",
+            description=wallet,
+            # description=f'${paperhands_address} has sold **{sales} Frenchies** for **{volume} SOL** today!',
+            colour=Colour.from_rgb(0, 191, 255),
+            url=f'https://explorer.solana.com/address/{wallet}',
+            # timestamp=dateutil.parser.parse(sale.date),
+        )
+
+        # sales = wallets.get(seller_address)
+
+        # embed.set_image(url=sale.image)
+        s = f'**{sales} Frenchies** sold for **{volume} SOL** today!'
+
+        if sales == 1:  # non-plural
+            s = f'**{sales} Frenchie** sold for **{volume} SOL** today!'
+
+        embed.add_field(name='Sales Overview', value=s, inline=False)
+
+        message = await ctx.send(embed=embed)
+
+    @staticmethod
+    async def fetch_sweeper(ctx):
+        data = Solanart.fetch()
+        wallets: dict = {}
+        volume: dict = {}
+
+        for sale in data:
+            buyer_address = sale['buyerAdd']
+            price = sale['price']
+
+            wallets[buyer_address] = wallets.get(buyer_address, 0) + 1
+            volume[buyer_address] = volume.get(buyer_address, 0) + price
+
+        wallet = max(wallets, key=wallets.get)
+        paperhands_address = wallet
+        volume = volume[paperhands_address]
+        sales = wallets[paperhands_address]
+
+        embed = Embed(
+            title="Sweeper of the Day",
+            description=wallet,
+            # description=f'${paperhands_address} has sold **{sales} Frenchies** for **{volume} SOL** today!',
+            colour=Colour.from_rgb(0, 191, 255),
+            url=f'https://explorer.solana.com/address/{wallet}',
+            # timestamp=dateutil.parser.parse(sale.date),
+        )
+
+        # sales = wallets.get(seller_address)
+
+        # embed.set_image(url=sale.image)
+        s = f'**{sales} Frenchies** bought for **{volume} SOL** today!'
+
+        if sales == 1:  # non-plural
+            s = f'**{sales} Frenchie** bought for **{volume} SOL** today!'
+
+        embed.add_field(name='Sales Overview', value=s, inline=False)
+
+        message = await ctx.send(embed=embed)
+
+    # @staticmethod
+    # async def fetch_paperhands(ctx):
+    #     data = Solanart.fetch()
+    #     wallets = {}
+    #
+    #     for sale in data:
+    #         wallets[sale.fromAddress] += sale.price
