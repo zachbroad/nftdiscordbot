@@ -6,7 +6,6 @@ A Discord bot designed to monitor and interact with NFTs on Solana platforms lik
 ## Prerequisites
 - Python 3.x
 - Discord account and bot token
-- Solana wallet (optional for certain features)
 
 ## Installation and Setup
 1. Clone the repository or download the zip.
