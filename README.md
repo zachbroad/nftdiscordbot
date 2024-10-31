@@ -1,7 +1,7 @@
 # Solana NFT Discord Bot
 
 ## Description
-A Discord bot designed to monitor and interact with NFTs on Solana platforms like Solanart and Magic Eden. Users can fetch, monitor, and interact with various NFT projects on the Solana blockchain directly from Discord.
+A Discord bot designed to monitor and interact with NFTs on Solana platforms like Solanart and Magic Eden. Users can fetch, monitor, and interact with NFT sales and prices on the Solana blockchain directly from Discord.
 
 ## Prerequisites
 - Python 3.x
